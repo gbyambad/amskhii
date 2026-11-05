@@ -1,0 +1,14 @@
+# App icon: `dart run flutter_launcher_icons` after changing assets/icon.
+# The PNGs come from the SVGs beside them (headless Chrome, 1024×1024).
+flutter_launcher_icons:
+  image_path: "assets/icon/icon.png"
+  android: true
+  min_sdk_android: 24
+  adaptive_icon_background: "#3550F0"
+  adaptive_icon_foreground: "assets/icon/foreground.png"
+  # The foreground is already drawn inside the 66dp safe zone.
+  adaptive_icon_foreground_inset: 0
+  # Android 13+ themed icons tint this layer.
+  adaptive_icon_monochrome: "assets/icon/foreground.png"
+  ios: true
+  remove_alpha_ios: true

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widgets, dark: the canvas's "харанхуй виджет" artboard. -->
+<resources>
+    <color name="widget_card">#171C28</color>
+    <color name="widget_ink">#F3F5F9</color>
+    <color name="widget_muted">#A3ABBD</color>
+    <color name="widget_faint">#9098AB</color>
+    <color name="widget_track">#2A3142</color>
+    <color name="widget_warm">#FF9A5C</color>
+    <color name="widget_warm_icon">#FF9A5C</color>
+    <color name="widget_accent">#5B74FF</color>
+</resources>

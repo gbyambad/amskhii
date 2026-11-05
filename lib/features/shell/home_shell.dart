@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/widgets/loading_skeleton.dart';
+import '../../state/pin_gate.dart';
 import '../../state/screen_time_providers.dart';
 import '../limits/limits_screen.dart';
 import '../overview/overview_screen.dart';
@@ -28,10 +30,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   void initState() {
     super.initState();
-    // Usage keeps growing and access may change in Settings while we're away.
+    // Usage keeps growing and access may change in Settings while we're away;
+    // a PIN unlock doesn't outlast leaving the app.
     _lifecycle = AppLifecycleListener(
+      onPause: () => ref.read(pinGateProvider).lock(),
       onResume: () => ref
         ..invalidate(usageAccessProvider)
+        ..invalidate(blockingAccessProvider)
         ..invalidate(todayUsageProvider)
         ..invalidate(weekReportProvider),
     );
@@ -48,7 +53,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final access = ref.watch(usageAccessProvider);
     if (access.value == false) return const PermissionScreen();
     if (!access.hasValue && !access.hasError) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: LoadingSkeleton());
     }
 
     return Scaffold(

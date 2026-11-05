@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:amskhii/app.dart';
+import 'package:amskhii/core/widgets/loading_skeleton.dart';
 import 'package:amskhii/features/shell/home_shell.dart';
 import 'package:amskhii/state/screen_time_providers.dart';
 import 'package:flutter/material.dart';
@@ -53,5 +56,29 @@ void main() {
     await tester.tap(find.text('Хязгаар'));
     await tester.pumpAndSettle();
     expect(find.text('Апп ба өдрийн хязгаар'), findsOneWidget);
+  });
+
+  testWidgets('a loading screen shimmers until its data arrives', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    final gate = Completer<void>();
+    final repository = FakeScreenTimeRepository()..todayGate = gate;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [screenTimeRepositoryProvider.overrideWithValue(repository)],
+        child: const ScreenTimeApp(),
+      ),
+    );
+    // The shimmer never settles, so step frames by hand.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(LoadingSkeleton), findsOneWidget);
+    expect(find.bySemanticsLabel('Ачаалж байна'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(LoadingSkeleton), findsNothing);
+    expect(find.text('4ц 12м'), findsOneWidget);
   });
 }

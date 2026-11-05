@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widgets, light: the canvas's "цайвар виджет" artboard. -->
+<resources>
+    <color name="widget_card">#FFFFFF</color>
+    <color name="widget_ink">#12141A</color>
+    <color name="widget_muted">#5B6170</color>
+    <color name="widget_faint">#6B7180</color>
+    <color name="widget_track">#ECEEF3</color>
+    <color name="widget_warm">#B4480A</color>
+    <color name="widget_warm_icon">#F06A1D</color>
+    <color name="widget_accent">#3550F0</color>
+    <!-- App icon background (flutter_launcher_icons.yaml). -->
+    <color name="ic_launcher_background">#3550F0</color>
+</resources>

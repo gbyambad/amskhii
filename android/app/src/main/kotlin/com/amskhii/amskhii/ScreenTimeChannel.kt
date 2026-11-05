@@ -1,4 +1,4 @@
-package com.example.amskhii
+package com.amskhii.amskhii
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -42,6 +42,11 @@ class ScreenTimeChannel(private val context: Context, messenger: BinaryMessenger
             "hasUsageAccess" -> result.success(usage.hasAccess())
             "openUsageAccessSettings" -> {
                 openUsageAccessSettings()
+                result.success(null)
+            }
+            "hasBlockingAccess" -> result.success(BlockingService.isEnabled(context))
+            "openBlockingSettings" -> {
+                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 result.success(null)
             }
             "getToday" -> inBackground(result, ::today)

@@ -17,6 +17,7 @@ class BlockSchedule {
   });
 
   static const _day = 24 * 60;
+  static const _week = 7 * _day;
 
   final String id;
   final String name;
@@ -31,6 +32,7 @@ class BlockSchedule {
   final bool enabled;
 
   /// Apps to block; `null` blocks everything except calls and messages.
+  /// On iOS this holds one `AppSelection.forSchedule` id instead.
   final Set<String>? appIds;
 
   bool get blocksAllApps => appIds == null;
@@ -61,6 +63,23 @@ class BlockSchedule {
         appIds: (json['appIds'] as List?)?.cast<String>().toSet(),
       );
 
+  /// Whether [next] blocks less than this: off, fewer apps, or any minute of
+  /// the week no longer covered. The changes the PIN guards.
+  bool loosenedBy(BlockSchedule next) {
+    if (!enabled) return false;
+    if (!next.enabled) return true;
+    final apps = appIds;
+    final nextApps = next.appIds;
+    if (apps == null ? nextApps != null : nextApps != null && !nextApps.containsAll(apps)) return true;
+    return !next._minutesOfWeek.containsAll(_minutesOfWeek);
+  }
+
+  /// Every minute this blocks, counted from Monday 00:00.
+  Set<int> get _minutesOfWeek => {
+        for (final day in weekdays)
+          for (var m = 0; m < length.inMinutes; m++) ((day - 1) * _day + startMinute + m) % _week,
+      };
+
   BlockSchedule copyWith({bool? enabled}) => _copy(enabled: enabled);
 
   /// Returns this unchanged if the shift would make start and end meet.
@@ -77,6 +96,8 @@ class BlockSchedule {
   BlockSchedule toggleWeekday(int weekday) => _copy(
         weekdays: weekdays.contains(weekday) ? ({...weekdays}..remove(weekday)) : {...weekdays, weekday},
       );
+
+  BlockSchedule withAppIds(Set<String> appIds) => _copy(appIds: appIds);
 
   BlockSchedule toggleApp(String appId) {
     final current = appIds ?? const <String>{};

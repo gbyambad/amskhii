@@ -49,6 +49,16 @@ class LimitRule {
     return (used.inSeconds / limit.inSeconds).clamp(0.0, 1.0);
   }
 
+  /// Whether going from this rule to [next] gives more time or access: the
+  /// changes the PIN guards.
+  bool loosenedBy(LimitRule next) {
+    if (blocked && !next.blocked) return true;
+    final limit = dailyLimit;
+    if (limit == null) return false;
+    final nextLimit = next.dailyLimit;
+    return nextLimit == null || nextLimit > limit || (onLimit == LimitAction.block && next.onLimit == LimitAction.warn);
+  }
+
   bool isNear(Duration used) {
     final left = remaining(used);
     return !blocked && left != null && left <= nearThreshold;
@@ -87,6 +97,8 @@ class ScreenTimeRules {
     this.pinEnabled = false,
   });
 
+  /// By package name on Android; on iOS by `AppSelection.id`, since apps
+  /// there are picked in Apple's picker and never named.
   final Map<String, LimitRule> apps;
   final Map<AppCategory, LimitRule> categories;
 
@@ -101,6 +113,8 @@ class ScreenTimeRules {
   LimitRule forCategory(AppCategory category) => categories[category] ?? LimitRule.none;
 
   ScreenTimeRules withApp(String appId, LimitRule rule) => _copy(apps: {...apps, appId: rule});
+
+  ScreenTimeRules withoutApp(String appId) => _copy(apps: {...apps}..remove(appId));
 
   ScreenTimeRules withCategory(AppCategory category, LimitRule rule) =>
       _copy(categories: {...categories, category: rule});
@@ -126,6 +140,16 @@ class ScreenTimeRules {
       totalDailyLimit: totalMinutes == null ? null : Duration(minutes: totalMinutes),
       pinEnabled: json['pinEnabled'] as bool? ?? false,
     );
+  }
+
+  /// Whether [next] loosens any rule, or turns the PIN off.
+  bool loosenedBy(ScreenTimeRules next) {
+    final total = totalDailyLimit;
+    final nextTotal = next.totalDailyLimit;
+    return apps.entries.any((e) => e.value.loosenedBy(next.forApp(e.key))) ||
+        categories.entries.any((e) => e.value.loosenedBy(next.forCategory(e.key))) ||
+        (total != null && (nextTotal == null || nextTotal > total)) ||
+        (pinEnabled && !next.pinEnabled);
   }
 
   ScreenTimeRules copyWith({ValueGetter<Duration?>? totalDailyLimit, bool? pinEnabled}) => _copy(

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Дэлгэцийн цаг" widget; ScreenTimeWidgets fills it. Widgets allow only some
+     view types, so there are no plain Views here, and they ignore font resources,
+     so the Unbounded numbers come in as images. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/widget_icon_tile"
+            android:importantForAccessibility="no"
+            android:padding="5dp"
+            android:src="@drawable/ic_widget_hourglass" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:text="@string/widget_usage_title"
+            android:textColor="@color/widget_ink"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/updated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:textColor="@color/widget_faint"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true" />
+            <TextView
+                android:id="@+id/compare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:textColor="@color/widget_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/pickups_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/pickups"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/widget_pickups_unit"
+                android:textColor="@color/widget_muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/chart"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="14dp"
+        android:contentDescription="@string/widget_chart"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:id="@+id/axis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="00"
+            android:textColor="@color/widget_faint"
+            android:textSize="11sp" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="06"
+            android:textColor="@color/widget_faint"
+            android:textSize="11sp" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="12"
+            android:textColor="@color/widget_faint"
+            android:textSize="11sp" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="18"
+            android:textColor="@color/widget_faint"
+            android:textSize="11sp" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="24"
+            android:textColor="@color/widget_faint"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/apps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/app1"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/app1_icon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:importantForAccessibility="no" />
+        <TextView
+            android:id="@+id/app1_name"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+        <ProgressBar
+            android:id="@+id/app1_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/widget_progress" />
+        <TextView
+            android:id="@+id/app1_time"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/app2"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/app2_icon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:importantForAccessibility="no" />
+        <TextView
+            android:id="@+id/app2_name"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+        <ProgressBar
+            android:id="@+id/app2_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/widget_progress" />
+        <TextView
+            android:id="@+id/app2_time"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/app3"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/app3_icon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:importantForAccessibility="no" />
+        <TextView
+            android:id="@+id/app3_name"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+        <ProgressBar
+            android:id="@+id/app3_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/widget_progress" />
+        <TextView
+            android:id="@+id/app3_time"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="@color/widget_ink"
+            android:textSize="13sp" />
+    </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

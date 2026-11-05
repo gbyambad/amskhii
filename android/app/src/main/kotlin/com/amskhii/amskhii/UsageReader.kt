@@ -1,4 +1,4 @@
-package com.example.amskhii
+package com.amskhii.amskhii
 
 import android.app.AppOpsManager
 import android.app.usage.UsageEvents

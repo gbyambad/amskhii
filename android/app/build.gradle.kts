@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.amskhii"
+    namespace = "com.amskhii.amskhii"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.amskhii"
+        applicationId = "com.amskhii.amskhii"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -42,4 +42,12 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // local_auth's biometric prompt needs AppCompat themes (styles.xml) on Android 8 and below.
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    // BlockRulesTest runs on the JVM, where android.jar's org.json is only a stub.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }

@@ -1,4 +1,4 @@
-package com.example.amskhii
+package com.amskhii.amskhii
 
 import android.content.Context
 import android.content.Intent

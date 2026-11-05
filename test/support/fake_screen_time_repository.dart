@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:amskhii/data/models/app_selection.dart';
 import 'package:amskhii/data/models/app_usage.dart';
 import 'package:amskhii/data/models/block_schedule.dart';
 import 'package:amskhii/data/models/limit_rule.dart';
@@ -122,8 +125,38 @@ class FakeScreenTimeRepository implements ScreenTimeRepository {
   @override
   Future<void> requestUsageAccess() async {}
 
+  /// Set to false to show the "turn blocking on" banner.
+  bool blockingAccess = true;
+
+  @override
+  Future<bool> hasBlockingAccess() async => blockingAccess;
+
+  @override
+  Future<void> requestBlockingAccess() async {}
+
+  /// iOS picks; [nextPick] is what the fake picker returns, `null` = cancelled.
+  final selections = <String, AppSelection>{};
+  AppSelection? Function(String id)? nextPick;
+
+  @override
+  Future<List<AppSelection>> loadSelections() async => selections.values.toList();
+
+  @override
+  Future<AppSelection?> pickApps(String id) async {
+    final picked = nextPick?.call(id);
+    if (picked != null) selections[id] = picked;
+    return picked;
+  }
+
+  @override
+  Future<void> deleteSelection(String id) async => selections.remove(id);
+
+  /// While set and not completed, today's usage stays loading.
+  Completer<void>? todayGate;
+
   @override
   Future<DayUsage> loadToday() async {
+    await todayGate?.future;
     final asOf = _asOf;
     return DayUsage(
       asOf: asOf,

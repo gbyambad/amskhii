@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only window changes, no screen content: the service needs to know which app is in front. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/blocking_service_description"
+    android:isAccessibilityTool="false"
+    android:notificationTimeout="100"
+    android:summary="@string/blocking_service_summary" />

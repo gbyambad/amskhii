@@ -1,4 +1,4 @@
-package com.example.amskhii
+package com.amskhii.amskhii
 
 import android.app.usage.NetworkStats
 import android.app.usage.NetworkStatsManager

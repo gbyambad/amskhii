@@ -10,9 +10,13 @@ import '../../core/widgets/cards.dart';
 import '../../core/widgets/charts.dart';
 import '../../core/widgets/controls.dart';
 import '../../core/widgets/tiles.dart';
+import '../../data/models/app_selection.dart';
 import '../../data/models/app_usage.dart';
 import '../../data/models/limit_rule.dart';
+import '../../state/pin_gate.dart';
 import '../../state/screen_time_providers.dart';
+import '../pin/pin_screen.dart';
+import 'blocking_banner.dart';
 
 class LimitsScreen extends ConsumerStatefulWidget {
   const LimitsScreen({super.key});
@@ -28,7 +32,8 @@ class _LimitsScreenState extends ConsumerState<LimitsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (ref.watch(nativeUsageReportsProvider)) return const _IosLimitsPending();
+    if (ref.watch(nativeUsageReportsProvider)) return const _IosLimits();
+    final blockingOff = ref.watch(blockingOffProvider);
     return AsyncView(
       value: combineAsync(ref.watch(todayUsageProvider), ref.watch(rulesProvider)),
       builder: (context, data) {
@@ -40,6 +45,7 @@ class _LimitsScreenState extends ConsumerState<LimitsScreen> {
               title: 'Хязгаар',
               subtitle: 'Апп эсвэл ангилал бүрт өдрийн хязгаар тавих, хэрэггүй үед нь идэвхгүй болгох',
             ),
+            if (blockingOff) const BlockingBanner(),
             SegmentedPills(
               options: const [(false, 'Апп'), (true, 'Ангилал')],
               selected: _byCategory,
@@ -275,8 +281,23 @@ class _PinCard extends ConsumerWidget {
 
   final bool enabled;
 
+  /// A new PIN is set up each time protection goes on.
+  Future<void> _turnOn(BuildContext context, WidgetRef ref) async {
+    final created = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(fullscreenDialog: true, builder: (_) => const PinSetupScreen()),
+    );
+    if (created == true) await ref.read(rulesProvider.notifier).setPinEnabled(true);
+  }
+
+  Future<void> _turnOff(WidgetRef ref) async {
+    if (await ref.read(rulesProvider.notifier).setPinEnabled(false)) await ref.read(pinStoreProvider).clear();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // A switch turned on before PINs existed has no PIN behind it: show it off.
+    final on = enabled && ref.watch(pinStoreProvider).hasPin;
     return SectionCard(
       child: MergeSemantics(
         child: Row(
@@ -289,11 +310,11 @@ class _PinCard extends ConsumerWidget {
                 spacing: 2,
                 children: [
                   Text('PIN кодоор хамгаалах', style: AppText.cardTitle),
-                  Text('Хязгаар өөрчлөх, хугацаа нэмэхэд PIN асууна', style: AppText.caption),
+                  Text('Хаалт унтраах, хязгаар нэмэхэд PIN асууна', style: AppText.caption),
                 ],
               ),
             ),
-            Switch(value: enabled, onChanged: (v) => ref.read(rulesProvider.notifier).setPinEnabled(v)),
+            Switch(value: on, onChanged: (v) => v ? _turnOn(context, ref) : _turnOff(ref)),
           ],
         ),
       ),
@@ -301,21 +322,143 @@ class _PinCard extends ConsumerWidget {
   }
 }
 
-/// The Android tab lists apps from today's usage, which Dart never gets on
-/// iOS; there apps come from Apple's own picker, added along with blocking.
-class _IosLimitsPending extends StatelessWidget {
-  const _IosLimitsPending();
+/// iOS: Dart never sees usage or app names there, so instead of listing
+/// today's apps the tab lists picks from Apple's picker. Each pick can be
+/// blocked or given a shared daily limit; Screen Time enforces both.
+class _IosLimits extends ConsumerWidget {
+  const _IosLimits();
+
+  Future<void> _add(WidgetRef ref) async {
+    final id = '${AppSelection.limitPrefix}${DateTime.now().microsecondsSinceEpoch}';
+    await ref.read(selectionsProvider.notifier).pick(id);
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return const ScreenScroll(
-      children: [
-        ScreenHeader(
-          title: 'Хязгаар',
-          subtitle: 'Апп эсвэл ангилал бүрт өдрийн хязгаар тавих, хэрэггүй үед нь идэвхгүй болгох',
-        ),
-        SectionCard(child: Text('iPhone дээр хязгаар тавих боломж удахгүй нэмэгдэнэ.', style: AppText.body)),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AsyncView(
+      value: combineAsync(ref.watch(selectionsProvider), ref.watch(rulesProvider)),
+      builder: (context, data) {
+        final (selections, rules) = data;
+        final picks = selections.where((s) => s.id.startsWith(AppSelection.limitPrefix)).toList();
+        return ScreenScroll(
+          children: [
+            const ScreenHeader(
+              title: 'Хязгаар',
+              subtitle: 'Аппуудаа сонгоод өдрийн хязгаар тавих эсвэл бүр хаах',
+            ),
+            if (picks.isEmpty)
+              const SectionCard(
+                child: Text(
+                  'Хязгаарлах аппуудаа сонгоно уу. Нэг дор сонгосон аппууд өдрийн хязгаараа хамтдаа хуваана.',
+                  style: AppText.body,
+                ),
+              ),
+            for (final pick in picks) _IosPickCard(pick: pick, rule: rules.forApp(pick.id)),
+            OutlinedButton.icon(
+              onPressed: () => _add(ref),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Апп сонгох'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+                foregroundColor: AppColors.ink,
+                side: const BorderSide(color: AppColors.inactive, width: 1.5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                textStyle: const TextStyle(fontFamily: 'Onest', fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+            _PinCard(enabled: rules.pinEnabled),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _IosPickCard extends ConsumerWidget {
+  const _IosPickCard({required this.pick, required this.rule});
+
+  static const _step = Duration(minutes: 15);
+
+  final AppSelection pick;
+  final LimitRule rule;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rules = ref.read(rulesProvider.notifier);
+    final limit = rule.dailyLimit;
+
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => ref.read(selectionsProvider.notifier).pick(pick.id),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      IconTile(icon: Icons.apps_rounded, color: rule.blocked ? AppColors.inactive : AppColors.accent),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 2,
+                          children: [
+                            Text(pick.label, style: AppText.rowTitle),
+                            Text(
+                              rule.blocked ? 'Хаалттай — дахин асаах хүртэл нээгдэхгүй' : 'Дарж аппуудаа өөрчлөх',
+                              style: AppText.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Semantics(
+                label: '${pick.label} хаах',
+                child: Switch(
+                  value: rule.blocked,
+                  onChanged: (_) => rules.toggleAppBlocked(pick.id),
+                  activeTrackColor: AppColors.ink,
+                ),
+              ),
+            ],
+          ),
+          if (!rule.blocked) ...[
+            StepperRow(
+              label: 'Өдрийн хязгаар',
+              value: limit == null ? 'Хязгааргүй' : formatDuration(limit),
+              onDecrement: limit == null ? null : () => rules.stepAppLimit(pick.id, -_step),
+              onIncrement: () => rules.stepAppLimit(pick.id, _step),
+              decrementTooltip: 'Хязгаарыг 15 минутаар багасгах',
+              incrementTooltip: 'Хязгаарыг 15 минутаар нэмэх',
+            ),
+            if (limit != null)
+              SegmentedPills(
+                options: const [(LimitAction.warn, 'Сануулах'), (LimitAction.block, 'Хаах')],
+                selected: rule.onLimit,
+                onChanged: (a) => rules.setAppRule(pick.id, rule.copyWith(onLimit: a)),
+              ),
+          ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () async {
+                if (await rules.removeApp(pick.id)) await ref.read(selectionsProvider.notifier).remove(pick.id);
+              },
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              label: const Text('Устгах'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.muted),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

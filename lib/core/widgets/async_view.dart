@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/app_theme.dart';
+import 'loading_skeleton.dart';
 
-/// Shows a spinner while loading, a message on error, else [builder].
+/// Shows [LoadingSkeleton] while loading, a message on error, else [builder].
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({super.key, required this.value, required this.builder});
 
@@ -21,7 +22,7 @@ class AsyncView<T> extends StatelessWidget {
         ),
       );
     }
-    return const Center(child: CircularProgressIndicator());
+    return const LoadingSkeleton();
   }
 }
 

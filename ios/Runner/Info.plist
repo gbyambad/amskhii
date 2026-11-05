@@ -6,8 +6,10 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Хаалт унтраах, хязгаар нэмэхээс өмнө таныг Face ID-аар баталгаажуулна.</string>
 	<key>CFBundleDisplayName</key>
-	<string>Amskhii</string>
+	<string>Амсхий</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

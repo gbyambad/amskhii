@@ -1,3 +1,4 @@
+import 'models/app_selection.dart';
 import 'models/app_usage.dart';
 import 'models/block_schedule.dart';
 import 'models/limit_rule.dart';
@@ -13,6 +14,22 @@ abstract interface class ScreenTimeRepository {
 
   /// Opens the OS screen where the user grants usage access.
   Future<void> requestUsageAccess();
+
+  /// Android only: whether the blocking service that enforces limits and
+  /// schedules is on. The user turns it on in Accessibility settings.
+  Future<bool> hasBlockingAccess();
+
+  /// Opens the OS screen where the user turns blocking on.
+  Future<void> requestBlockingAccess();
+
+  /// iOS: what the user has picked in Apple's app picker; empty on Android.
+  Future<List<AppSelection>> loadSelections();
+
+  /// iOS: opens Apple's app picker for [id], starting from the earlier pick.
+  /// Returns `null` when the user cancels.
+  Future<AppSelection?> pickApps(String id);
+
+  Future<void> deleteSelection(String id);
 
   Future<DayUsage> loadToday();
 

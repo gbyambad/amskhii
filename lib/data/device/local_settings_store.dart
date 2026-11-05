@@ -6,6 +6,10 @@ import '../models/block_schedule.dart';
 import '../models/limit_rule.dart';
 
 /// Keeps the user's limits and schedules on the phone as JSON.
+///
+/// On Android, `BlockRules.load` (the blocking service and the limit widget)
+/// reads these keys straight from the plugin's file, so renaming a key or
+/// changing the JSON means updating `BlockRules.kt` too.
 class LocalSettingsStore {
   const LocalSettingsStore(this._prefs);
 

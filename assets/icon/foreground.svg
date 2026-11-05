@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Android adaptive/themed icon layer: the hourglass alone, inside the 66dp safe zone. -->
+  <g transform="translate(512 512) scale(20) translate(-12 -12)" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 3h12M6 21h12" stroke-width="2.2"/>
+    <path d="M7.3 3v3a4.7 4.7 0 0 0 9.4 0V3M7.3 21v-3a4.7 4.7 0 0 1 9.4 0v3" stroke-width="2.2"/>
+    <path d="M8.62 7.5H15.38A3.65 3.65 0 0 1 8.62 7.5Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M12 10.4V16.4" stroke-width="0.8"/>
+    <path d="M8.35 20V18.6Q12 15.4 15.65 18.6V20Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

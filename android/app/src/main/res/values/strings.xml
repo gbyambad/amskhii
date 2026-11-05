@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="blocking_service_label">Амсхий</string>
+    <string name="blocking_service_summary">Хязгаар, хуваарийн дагуу аппуудыг хаана</string>
+    <string name="blocking_service_description">Таны тавьсан хязгаар, хуваарийн дагуу аппуудыг хаахын тулд Амсхий зөвхөн аль апп нээгдсэнийг хардаг. Дэлгэц дээрх агуулгыг уншихгүй, мэдээлэл утаснаас гарахгүй.</string>
+    <string name="widget_usage_title">Дэлгэцийн цаг</string>
+    <string name="widget_usage_description">Өнөөдрийн дэлгэцийн цаг, цаг тутмын график, хамгийн их ашигласан аппууд</string>
+    <string name="widget_pickups_title">Утсаа шалгасан</string>
+    <string name="widget_pickups_description">Өнөөдөр утсаа хэдэн удаа шалгасан</string>
+    <string name="widget_pickups_unit">удаа шалгасан</string>
+    <string name="widget_pickups_today">удаа, өнөөдөр</string>
+    <string name="widget_limit_title">Хязгаар</string>
+    <string name="widget_limit_description">Хязгаартаа хамгийн ойртсон апп, хэдэн минут үлдсэн</string>
+    <string name="widget_limit_left">үлдсэн</string>
+    <string name="widget_chart">Цаг тутмын ашиглалт</string>
+</resources>

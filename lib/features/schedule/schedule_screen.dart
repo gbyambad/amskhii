@@ -9,9 +9,11 @@ import '../../core/widgets/async_view.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/controls.dart';
 import '../../core/widgets/tiles.dart';
+import '../../data/models/app_selection.dart';
 import '../../data/models/app_usage.dart';
 import '../../data/models/block_schedule.dart';
 import '../../state/screen_time_providers.dart';
+import '../limits/blocking_banner.dart';
 
 class ScheduleScreen extends ConsumerStatefulWidget {
   const ScheduleScreen({super.key});
@@ -37,20 +39,37 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     await ref.read(schedulesProvider.notifier).add(schedule);
   }
 
+  /// iOS: the schedule's apps come from Apple's picker.
+  Future<void> _pickApps(BlockSchedule schedule) async {
+    final id = AppSelection.forSchedule(schedule.id);
+    final picked = await ref.read(selectionsProvider.notifier).pick(id);
+    if (picked == null) return;
+    await ref.read(schedulesProvider.notifier).replace(schedule.withAppIds(picked.isEmpty ? const {} : {id}));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final blockingOff = ref.watch(blockingOffProvider);
+    final ios = ref.watch(nativeUsageReportsProvider);
+    // Dart gets today's apps on Android only; iOS lists picks instead.
+    final AsyncValue<(List<AppUsage>, List<AppSelection>)> choices = ios
+        ? ref.watch(selectionsProvider).whenData((picks) => (const <AppUsage>[], picks))
+        : ref.watch(todayUsageProvider).whenData((usage) => (usage.apps, const <AppSelection>[]));
     return AsyncView(
-      value: combineAsync(ref.watch(schedulesProvider), ref.watch(todayUsageProvider)),
+      value: combineAsync(ref.watch(schedulesProvider), choices),
       builder: (context, data) {
-        final (schedules, usage) = data;
+        final (schedules, (apps, picks)) = data;
         final notifier = ref.read(schedulesProvider.notifier);
         return ScreenScroll(
           children: [
             const ScreenHeader(title: 'Хуваарь', subtitle: 'Тодорхой цагт аппуудыг автоматаар хаах'),
+            if (blockingOff) const BlockingBanner(),
             for (final schedule in schedules)
               _ScheduleCard(
                 schedule: schedule,
-                apps: usage.apps,
+                apps: apps,
+                pick: picks.where((p) => p.id == AppSelection.forSchedule(schedule.id)).firstOrNull,
+                onPickApps: ios ? () => _pickApps(schedule) : null,
                 expanded: _expanded == schedule.id,
                 onToggleExpanded: () => setState(() => _expanded = _expanded == schedule.id ? null : schedule.id),
                 onChanged: notifier.replace,
@@ -92,12 +111,19 @@ class _ScheduleCard extends StatelessWidget {
     required this.expanded,
     required this.onToggleExpanded,
     required this.onChanged,
+    this.pick,
+    this.onPickApps,
   });
 
   static const _hour = 60;
 
   final BlockSchedule schedule;
   final List<AppUsage> apps;
+
+  /// iOS: the schedule's pick from Apple's picker, changed through [onPickApps]
+  /// instead of choosing from [apps].
+  final AppSelection? pick;
+  final VoidCallback? onPickApps;
   final bool expanded;
   final VoidCallback onToggleExpanded;
   final ValueChanged<BlockSchedule> onChanged;
@@ -211,25 +237,53 @@ class _ScheduleCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(color: AppColors.surfaceMuted, borderRadius: BorderRadius.circular(16)),
                       child: Text(
-                        'Дуудлага, мессежээс бусад бүх апп хаагдана.',
+                        onPickApps == null
+                            ? 'Дуудлага, мессежээс бусад бүх апп хаагдана.'
+                            : 'Бүх апп хаагдана. Яаралтай дуудлага үргэлж боломжтой.',
                         style: AppText.body.copyWith(fontSize: 13, color: AppColors.ink),
                       ),
                     )
                   else ...[
                     const Text('Хаах аппууд', style: AppText.label),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final app in apps)
-                          ChoicePill(
-                            label: app.name,
-                            selected: s.appIds!.contains(app.appId),
-                            leading: AppTile(appId: app.appId, name: app.name, icon: app.icon, size: 30),
-                            onTap: () => onChanged(s.toggleApp(app.appId)),
+                    if (onPickApps case final onPickApps?)
+                      Material(
+                        color: AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(16),
+                        child: InkWell(
+                          onTap: onPickApps,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              spacing: 10,
+                              children: [
+                                const Icon(Icons.apps_rounded, color: AppColors.accent),
+                                Expanded(
+                                  child: Text(
+                                    pick?.label ?? 'Апп сонгоогүй',
+                                    style: AppText.rowTitle.copyWith(fontSize: 14),
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: AppColors.inactive),
+                              ],
+                            ),
                           ),
-                      ],
-                    ),
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final app in apps)
+                            ChoicePill(
+                              label: app.name,
+                              selected: s.appIds!.contains(app.appId),
+                              leading: AppTile(appId: app.appId, name: app.name, icon: app.icon, size: 30),
+                              onTap: () => onChanged(s.toggleApp(app.appId)),
+                            ),
+                        ],
+                      ),
                   ],
                 ],
               ),
